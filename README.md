@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>دليل مقاعد الظل</title>
+    <!-- استدعاء المكتبات عبر الإنترنت -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // الأيقونات
+        const IconSun = ({ className }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>;
+        const IconCompass = ({ className }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>;
+        const IconMapPin = ({ className }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
+        const IconAlert = ({ className }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>;
+        const IconMoon = ({ className }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>;
+        const IconGlobe = ({ className }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>;
+
+        const translations = {
+            ar: { appTitle: "دليل مقاعد الظل", currentLocation: "الموقع الحالي", findLocationBtn: "تحديد موقعي (GPS)", findingLocationBtn: "جاري البحث...", orRoute: "أو حدد مسار الرحلة", fromPlaceholder: "من (مثال: الدار البيضاء، باريس...)", toPlaceholder: "إلى (مثال: مراكش، لندن...)", calcRouteBtn: "حساب اتجاه الرحلة", calculatingBtn: "جاري الحساب...", locationSetMsg: "تم تحديد الموقع بنجاح.", changeBtn: "تغيير", nightTitle: "الوقت ليلاً", nightDesc: "الشمس غائبة حالياً، اجلس في أي مكان تريده!", shadowLeftTitle: "الظل في الجهة اليسرى", shadowRightTitle: "الظل في الجهة اليمنى", shadowCenterTitle: "الشمس في الأمام/الخلف", shadowLeftDesc: "✓ اجلس على مقاعد يسار الحافلة/السيارة", shadowRightDesc: "✓ اجلس على مقاعد يمين الحافلة/السيارة", shadowCenterDesc: "كلا الجهتين مناسبتان تقريباً", frontLabel: "أمام", backLabel: "خلف", vehicleHeading: "اتجاه المركبة", useCompassBtn: "استخدام بوصلة الهاتف", stopCompassBtn: "إيقاف البوصلة التلقائية", errEnterCities: "يرجى إدخال مدينة الانطلاق ومدينة الوصول", errNotFound: "تعذر إيجاد المسار، تأكد من أسماء المدن.", routeSuccess: "تم تحديد المسار! الاتجاه:", errGpsDenied: "تم رفض إذن الوصول للموقع.", errGpsUnavail: "الموقع غير متاح حالياً.", errGpsTimeout: "انتهى وقت طلب الموقع.", errGpsDefault: "تعذر الحصول على الموقع. يرجى تفعيل الـ GPS.", errGpsNotSupp: "متصفحك لا يدعم تحديد الموقع.", errCompassDenied: "تم رفض إذن البوصلة.", errCompassNotSupp: "البوصلة غير مدعومة في هذا الجهاز." },
+            en: { appTitle: "Shadow Seat", currentLocation: "Current Location", findLocationBtn: "My Location (GPS)", findingLocationBtn: "Finding...", orRoute: "Or route", fromPlaceholder: "From...", toPlaceholder: "To...", calcRouteBtn: "Calculate Route", calculatingBtn: "Calculating...", locationSetMsg: "Location set successfully.", changeBtn: "Change", nightTitle: "Night Time", nightDesc: "The sun is down, sit wherever you like!", shadowLeftTitle: "Shadow on the Left", shadowRightTitle: "Shadow on the Right", shadowCenterTitle: "Sun in Front/Back", shadowLeftDesc: "✓ Sit on the left seats", shadowRightDesc: "✓ Sit on the right seats", shadowCenterDesc: "Both sides are fine", frontLabel: "Front", backLabel: "Back", vehicleHeading: "Vehicle Heading", useCompassBtn: "Use phone compass", stopCompassBtn: "Stop compass", errEnterCities: "Please enter cities", errNotFound: "Route not found.", routeSuccess: "Route set! Heading:", errGpsDenied: "Location permission denied.", errGpsUnavail: "Location unavailable.", errGpsTimeout: "Request timed out.", errGpsDefault: "Could not get location.", errGpsNotSupp: "Geolocation not supported.", errCompassDenied: "Compass denied.", errCompassNotSupp: "Compass not supported." },
+            fr: { appTitle: "Siège à l'Ombre", currentLocation: "Position Actuelle", findLocationBtn: "Ma position (GPS)", findingLocationBtn: "Recherche...", orRoute: "Ou itinéraire", fromPlaceholder: "De...", toPlaceholder: "À...", calcRouteBtn: "Calculer l'itinéraire", calculatingBtn: "Calcul en cours...", locationSetMsg: "Position définie.", changeBtn: "Modifier", nightTitle: "Il fait nuit", nightDesc: "Soleil couché, asseyez-vous où vous voulez !", shadowLeftTitle: "Ombre à Gauche", shadowRightTitle: "Ombre à Droite", shadowCenterTitle: "Soleil devant/derrière", shadowLeftDesc: "✓ Asseyez-vous à gauche", shadowRightDesc: "✓ Asseyez-vous à droite", shadowCenterDesc: "Les deux côtés conviennent", frontLabel: "Avant", backLabel: "Arrière", vehicleHeading: "Direction", useCompassBtn: "Utiliser boussole", stopCompassBtn: "Arrêter boussole", errEnterCities: "Veuillez entrer les villes", errNotFound: "Itinéraire introuvable.", routeSuccess: "Itinéraire défini ! Dir:", errGpsDenied: "Permission refusée.", errGpsUnavail: "Position indisponible.", errGpsTimeout: "Délai dépassé.", errGpsDefault: "Impossible d'obtenir la position.", errGpsNotSupp: "Non supporté.", errCompassDenied: "Boussole refusée.", errCompassNotSupp: "Non supporté." }
+        };
+
+        const CityInput = ({ value, onChange, placeholder, t }) => {
+            const [suggestions, setSuggestions] = useState([]);
+            const [showDropdown, setShowDropdown] = useState(false);
+            const [isLoading, setIsLoading] = useState(false);
+
+            useEffect(() => {
+                if (!value || value.length < 2 || !showDropdown) { setSuggestions([]); return; }
+                const delayDebounceFn = setTimeout(async () => {
+                    setIsLoading(true);
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&limit=5`);
+                        const data = await res.json();
+                        setSuggestions(data);
+                    } catch (e) { console.error(e); } finally { setIsLoading(false); }
+                }, 600);
+                return () => clearTimeout(delayDebounceFn);
+            }, [value, showDropdown]);
+
+            return (
+                <div className="relative w-full">
+                    <input type="text" value={value}
+                        onChange={(e) => { onChange(e.target.value); setShowDropdown(true); }}
+                        onFocus={() => { if (value.length > 1) setShowDropdown(true); }}
+                        onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                        placeholder={placeholder}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm" dir="auto" />
+                    {showDropdown && (suggestions.length > 0 || isLoading) && (
+                        <ul className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl max-h-60 overflow-y-auto" dir="auto">
+                            {isLoading && <li className="px-4 py-3 text-sm text-slate-500">{t.findingLocationBtn}</li>}
+                            {!isLoading && suggestions.map((item, idx) => {
+                                const shortName = item.name || item.display_name.split(',')[0];
+                                return (
+                                    <li key={idx} onMouseDown={(e) => { e.preventDefault(); onChange(shortName); setShowDropdown(false); }}
+                                        className="px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100">
+                                        <span className="font-bold block text-slate-800">{shortName}</span>
+                                        <span className="text-xs text-slate-500 block truncate mt-0.5" title={item.display_name}>{item.display_name}</span>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    )}
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [lang, setLang] = useState('ar');
+            const t = translations[lang] || translations['en'];
+            const isRtl = lang === 'ar';
+
+            const [location, setLocation] = useState(null);
+            const [locationErrorCode, setLocationErrorCode] = useState('');
+            const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+            const [heading, setHeading] = useState(0);
+            const [isCompassActive, setIsCompassActive] = useState(false);
+            const [currentTime, setCurrentTime] = useState(new Date());
+            const [startCity, setStartCity] = useState('');
+            const [endCity, setEndCity] = useState('');
+            const [isRouting, setIsRouting] = useState(false);
+            const [routeStatus, setRouteStatus] = useState(null);
+
+            useEffect(() => {
+                const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+                return () => clearInterval(timer);
+            }, []);
+
+            const requestLocation = () => {
+                setLocationErrorCode('');
+                setIsLoadingLocation(true);
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => { setLocation({ lat: position.coords.latitude, lng: position.coords.longitude }); setIsLoadingLocation(false); },
+                        (error) => {
+                            let code = 'errGpsDefault';
+                            if (error.code === 1) code = 'errGpsDenied';
+                            else if (error.code === 2) code = 'errGpsUnavail';
+                            else if (error.code === 3) code = 'errGpsTimeout';
+                            setLocationErrorCode(code); setIsLoadingLocation(false);
+                        },
+                        { timeout: 15000, enableHighAccuracy: true }
+                    );
+                } else { setLocationErrorCode('errGpsNotSupp'); setIsLoadingLocation(false); }
+            };
+
+            const getBearing = (lat1, lon1, lat2
+
+
